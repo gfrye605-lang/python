@@ -1,1 +1,7 @@
-print("Hello World!")
+print("Hello! My name is Python.")
+Name = input("What is your name? ")
+print("It's very nice to meet you", Name,"!")
+print("My favorite color is Green!")
+Fav_Color = input("What is your favorite color? ")
+print("Wow!", Fav_Color, "is such a nice color!")
+print("I was so nice to meet you!", Name,"\nHave a great day!!")
