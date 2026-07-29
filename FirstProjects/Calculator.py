@@ -4,7 +4,7 @@ import sys
 
 # Confirmation
 ans = input("Would you like to use the calculator? Y/n ")
-if ans == "Y": 
+if ans == "Y" or "y": 
     print("Okay!")
 else:
     sys.exit()
@@ -15,9 +15,17 @@ op = input("What is your operation? ") # Asks & stores operation
 num2 = int(input("What is your second number? "))
 
 # Calulator logic
-if num1 or num2 != int:
-    print("Please enter a number!")
-
+allowed_ops = ["+","-","/","x"]
+result = None
+def calculate(num1, op, num2):
+    if op not in allowed_ops:
+        print("Invalid Operiaion. Valid operations are\n+, -, /, x")
+    elif op == "+":
+        num1 + num2
+    return result
+    
 # Serve user their answer
-print("Calculating...")
-time.sleep(3000)
+def resultt(result):
+    print("Calculating...")
+    print(result)
+resultt()
