@@ -1,79 +1,138 @@
 import tkinter as tk
+import asyncio
+from async_tkinter_loop import async_handler, async_mainloop
+
 
 # Vars
+current_total = None
 current_num = None
-current_op  = None
-op = None
-equate = False
-passednum1 = None
+pending_op = None
+currentans = None
 firstpassednum = None
-taking_part1 = False
-stored_num = None
-num_groups = {}
-op_groups = []
+taking_num = False
 
 # Number pass logic
 def take_num(passed_num):
     global firstpassednum
-    global taking_part1
+    global taking_num
     global current_num
 
-    if taking_part1 == True:
+    if taking_num == True and current_num != None:
         print(passed_num)
         current_num = int(str(current_num) + str(passed_num))
         print(current_num)
         update_gui(text= current_num)
         print(firstpassednum)
-    elif firstpassednum == None:
+
+    elif firstpassednum == None or current_num == None:
         firstpassednum = passed_num
         current_num = firstpassednum
         update_gui(text= current_num)
-        taking_part1 = True
-
-# Infinitly store numbers
-def store_numbers(savednum):
-    global stored_num
-    i = 1
-    while f"group_{i}" in num_groups:
-        i += 1  
-
-    num_groups[f"group_{i}"] = savednum
-    print("Updated Groups:", num_groups)
-    stored_num = i
-
+        taking_num = True
 
 # OP pass logic
-
 def take_op(passed_op):
-    savednum = current_num
-    print(savednum)
-    store_numbers(savednum)
-    print("Num groups: ", num_groups)
-    clr_num()
+    global pending_op
+    global current_total
+    save_first_num()
     if passed_op == "+":
-        op_groups.append("+")
-        print(op_groups)
+        pending_op = "+"
     elif passed_op == "-":
-        op_groups.append("-")
-        print(op_groups)
-    update_gui(text=op)
-    return savednum
+        pending_op = "-"
+    elif passed_op == "*":
+        pending_op = "*"
+    elif passed_op == "/":
+        pending_op = "/"
+    elif passed_op == "//":
+        pending_op = "//"
+    elif passed_op == "%":
+        pending_op = "%"
 
-# Equate logic
-def eq():
-    global stored_num
-    i = stored_num
-    for count in range(1, i + 1):
-        group_key = f"group_{count}"
+# Save num
+def save_first_num():
+    global current_total
+    global current_num
+    if current_total == None:
+        current_total = current_num
+        current_num = None
+    elif current_total != None:
+        back_eq()
+        print(current_total)
+    return current_total
+
+# Background answer logic // held in backend
+def back_eq():
+    global current_total
+    global current_num
+    global pending_op
+    if current_total != None and current_num != None:
+        if pending_op == "+":
+            current_total = current_total + current_num
+            current_num = None
+            print("BG ANS: ", current_total)
+        elif pending_op == "-":
+            current_total = current_total - current_num
+            current_num = None
+            print("BG ANS: ", current_total)
+        elif pending_op == "*":
+            current_total = current_total * current_num
+            current_num = None
+            print("BG ANS: ", current_total)
+        elif pending_op == "/":
+            current_total = current_total / current_num
+            current_num = None
+            print("BG ANS: ", current_total)
+        elif pending_op == "//":
+            current_total = current_total // current_num
+            current_num = None
+            print("BG ANS: ", current_total)
+        elif pending_op == "%":
+            current_total = current_total % current_num
+            current_num = None
+            print("BG ANS: ", current_total)
         
-        locals()[f"num{count}"] = num_groups[group_key]
-        print(locals)
 
-
+# Final answer logic // shown on GUI
+def final_eq():
+    final_ans = None
+    global current_total
+    global current_num
+    global pending_op
+    if current_total != None and current_num != None:
+        if pending_op == "+":
+            final_ans = current_total + current_num
+            update_gui(text=final_ans)
+            current_total = None
+            pending_op = None
+        if pending_op == "-":
+            final_ans = current_total - current_num
+            update_gui(text=final_ans)
+            current_total = None
+            pending_op = None
+        if pending_op == "*":
+            final_ans = current_total * current_num
+            update_gui(text=final_ans)
+            current_total = None
+            pending_op = None
+        if pending_op == "/":
+            final_ans = current_total / current_num
+            update_gui(text=final_ans)
+            current_total = None
+            pending_op = None
+        if pending_op == "//":
+            final_ans = current_total // current_num
+            update_gui(text=final_ans)
+            current_total = None
+            pending_op = None
+        if pending_op == "%":
+            final_ans = current_total % current_num
+            update_gui(text=final_ans)
+            current_total = None
+            pending_op = None
+        
 # Update GUI
 def update_gui(text):
-    text = current_num
-    num_label.configure(text=text, fg="White")
+    num_label.configure(text=text, fg="Light Green")
 
 # Clear button logic
 def clr_num():
@@ -90,58 +149,86 @@ def clr_num():
 # Initialize main window
 root = tk.Tk()
 root.title("Calcuator")
-root.geometry("1280x680")
+root.geometry("1080x985")
 root.configure(background="Grey")
 
 # Main Objects
 # Labels
 num_label = tk.Label(root, text=None)
-num_label.configure(background="Black", width=64, height=4, font=("Helvetica", 16))
-num_label.grid(row=0, column=0, columnspan=3, sticky="ew")
+num_label.configure(background="Black", width=90, height=4, font=("Helvetica", 16))
+num_label.grid(row=0, column=0, columnspan=5, sticky="ew")
+credits = tk.Label(root, text="By: \nGarrett Fryer" ,font=("Helvetica", 20, "bold"), background="Grey")
+credits.grid(row=5,column=4)
+
 
 # Buttons
-Button_1 = tk.Button(root, width=15, height=7, text="1", command=lambda: take_num(passed_num=1))
-Button_2 = tk.Button(root, width=15, height=7, text="2", command=lambda: take_num(passed_num=2))
-Button_3 = tk.Button(root, width=15, height=7, text="3", command=lambda: take_num(passed_num=3))
-Button_4 = tk.Button(root, width=15, height=7, text="4", command=lambda: take_num(passed_num=4))
-Button_5 = tk.Button(root, width=15, height=7, text="5", command=lambda: take_num(passed_num=5))
-Button_6 = tk.Button(root, width=15, height=7, text="6", command=lambda: take_num(passed_num=6))
-Button_7 = tk.Button(root, width=15, height=7, text="7", command=lambda: take_num(passed_num=7))
-Button_8 = tk.Button(root, width=15, height=7, text="8", command=lambda: take_num(passed_num=8))
-Button_9 = tk.Button(root, width=15, height=7, text="9", command=lambda: take_num(passed_num=9))
-Button_dot = tk.Button(root, width=15, height=7, text=".")
-Button_0 = tk.Button(root, width=15, height=7, text="0", command=lambda: take_num(passed_num=0))
-Button_Equals = tk.Button(root, width=15, height=7, text="=", command=lambda: eq())
-Button_Plus = tk.Button(root, width=15, height=7, text="+", command=lambda: take_op(passed_op="+"))
-Button_Minus = tk.Button(root, width=15, height=7, text="-", command=lambda: take_op(passed_op="-"))
-Button_FloorDiv = tk.Button(root, width=15, height=7, text="//", command=lambda: take_op(passed_op="//"))
-Button_Modulus = tk.Button(root, width=15, height=7, text="%", command=lambda: take_op(passed_op="%"))
-Button_Div = tk.Button(root, width=15, height=7, text="/", command=lambda: take_op(passed_op="/"))
-Button_Multiplication = tk.Button(root, width=15, height=7, text="*", command=lambda: take_op(passed_op="*"))
-Button_CLR = tk.Button(root, width=15, height=7, text="CLR", command=lambda: clr_num())
+Button_1 = tk.Button(root, width=15, height=7, text="1", bd=5,relief="groove", command=lambda: take_num(passed_num=1))
+Button_2 = tk.Button(root, width=15, height=7, text="2", bd=5,relief="groove", command=lambda: take_num(passed_num=2))
+Button_3 = tk.Button(root, width=15, height=7, text="3", bd=5,relief="groove", command=lambda: take_num(passed_num=3))
+Button_4 = tk.Button(root, width=15, height=7, text="4", bd=5,relief="groove", command=lambda: take_num(passed_num=4))
+Button_5 = tk.Button(root, width=15, height=7, text="5", bd=5,relief="groove", command=lambda: take_num(passed_num=5))
+Button_6 = tk.Button(root, width=15, height=7, text="6", bd=5,relief="groove", command=lambda: take_num(passed_num=6))
+Button_7 = tk.Button(root, width=15, height=7, text="7", bd=5,relief="groove", command=lambda: take_num(passed_num=7))
+Button_8 = tk.Button(root, width=15, height=7, text="8", bd=5,relief="groove", command=lambda: take_num(passed_num=8))
+Button_9 = tk.Button(root, width=15, height=7, text="9", bd=5,relief="groove", command=lambda: take_num(passed_num=9))
+Button_dot = tk.Button(root, width=15, height=7, text=".", bd=5,relief="groove")
+Button_0 = tk.Button(root, width=15, height=7, text="0", bd=5,relief="groove", command=lambda: take_num(passed_num=0))
+Button_Equals = tk.Button(root, width=15, height=7, text="=", bd=5,relief="solid", command=lambda: final_eq())
+Button_Plus = tk.Button(root, width=15, height=7, text="+", bd=5,relief="groove", command=lambda: take_op(passed_op="+"))
+Button_Minus = tk.Button(root, width=15, height=7, text="-", bd=5,relief="groove", command=lambda: take_op(passed_op="-"))
+Button_FloorDiv = tk.Button(root, width=15, height=7, text="//", bd=5,relief="groove", command=lambda: take_op(passed_op="//"))
+Button_Modulus = tk.Button(root, width=15, height=7, text="%", bd=5,relief="groove", command=lambda: take_op(passed_op="%"))
+Button_Div = tk.Button(root, width=15, height=7, text="/", bd=5,relief="groove", command=lambda: take_op(passed_op="/"))
+Button_Multiplication = tk.Button(root, width=15, height=7, text="*", bd=5,relief="groove", command=lambda: take_op(passed_op="*"))
+Button_CLR = tk.Button(root, width=15, height=7, text="CLR", bd=5,relief="groove", command=lambda: clr_num())
 
-Button_Multiplication.grid(row=4, column=3, padx=5, pady=5)
-Button_Div.grid(row=2, column=3, padx=5, pady=5)
-Button_FloorDiv.grid(row=2, column=4, padx=5, pady=5)
-Button_Modulus.grid(row=3, column=4, padx=5, pady=5)
-Button_Plus.grid(row=4, column=4, padx=5, pady=5)
-Button_Minus.grid(row=3, column=3, padx=5, pady=5)
-Button_Equals.grid(row=5, column=3, padx=5, pady=5)
+Button_Multiplication.grid(row=4, column=3, padx=0, pady=10)
+Button_Div.grid(row=2, column=3, padx=5, pady=10)
+Button_FloorDiv.grid(row=2, column=4, padx=5, pady=10)
+Button_Modulus.grid(row=3, column=4, padx=5, pady=10)
+Button_Plus.grid(row=4, column=4, padx=5, pady=10)
+Button_Minus.grid(row=3, column=3, padx=5, pady=10)
+Button_Equals.grid(row=5, column=3, padx=5, pady=10)
 
-Button_1.grid(row=4, column=0, padx=5, pady=5)
-Button_2.grid(row=4, column=1, padx=5, pady=5)
-Button_3.grid(row=4, column=2, padx=5, pady=5)
+Button_1.grid(row=4, column=0, padx=0, pady=10)
+Button_2.grid(row=4, column=1, padx=0, pady=10)
+Button_3.grid(row=4, column=2, padx=0, pady=10)
 
-Button_4.grid(row=3, column=0, padx=5, pady=5)
-Button_5.grid(row=3, column=1, padx=5, pady=5)
-Button_6.grid(row=3, column=2, padx=5, pady=5)
+Button_4.grid(row=3, column=0, padx=0, pady=10)
+Button_5.grid(row=3, column=1, padx=0, pady=10)
+Button_6.grid(row=3, column=2, padx=0, pady=10)
 
-Button_7.grid(row=2, column=0, padx=5, pady=5)
-Button_8.grid(row=2, column=1, padx=5, pady=5)
-Button_9.grid(row=2, column=2, padx=5, pady=5)
+Button_7.grid(row=2, column=0, padx=0, pady=10)
+Button_8.grid(row=2, column=1, padx=0, pady=10)
+Button_9.grid(row=2, column=2, padx=0, pady=10)
 
-Button_dot.grid(row=5, column=1, padx=5, pady=5)
-Button_0.grid(row=5, column=0, padx=5, pady=5)
-Button_CLR.grid(row=5, column=2, padx=5, pady=5)
+Button_dot.grid(row=5, column=1, padx=0, pady=10)
+Button_0.grid(row=5, column=0, padx=0, pady=10)
+Button_CLR.grid(row=5, column=2, padx=0, pady=10)
 
-root.mainloop()
+# Credits
+
+def rgb_to_hex(rgb):
+    return "#%02x%02x%02x" % rgb
+
+async def rgb_credits():
+    credit = True
+    while credit:
+        for g in range(0, 255, 15):
+            credits.config(foreground=rgb_to_hex((255, g, 0)))
+            await asyncio.sleep(0.03)
+        # Transition Green -> Blue
+        for r in range(255, 0, -15):
+            credits.config(foreground=rgb_to_hex((r, 255, 0)))
+            await asyncio.sleep(0.03)
+        # Transition Blue -> Red
+        for b in range(255, 0, -15):
+            credits.config(foreground=rgb_to_hex((0, r if 'r' in locals() else 0, b)))
+            await asyncio.sleep(0.03)
+
+
+start_loop = async_handler(rgb_credits)
+
+root.after(100, start_loop)
+
+async_mainloop(root)
