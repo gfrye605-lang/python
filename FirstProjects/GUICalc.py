@@ -8,7 +8,9 @@ equate = False
 passednum1 = None
 firstpassednum = None
 taking_part1 = False
-#passed_num = None
+stored_num = None
+num_groups = {}
+op_groups = []
 
 # Number pass logic
 def take_num(passed_num):
@@ -28,22 +30,45 @@ def take_num(passed_num):
         update_gui(text= current_num)
         taking_part1 = True
 
+# Infinitly store numbers
+def store_numbers(savednum):
+    global stored_num
+    i = 1
+    while f"group_{i}" in num_groups:
+        i += 1  
+
+    num_groups[f"group_{i}"] = savednum
+    print("Updated Groups:", num_groups)
+    stored_num = i
+
+
 # OP pass logic
+
 def take_op(passed_op):
-    part1_eq.append("+")
-    update_gui()
+    savednum = current_num
+    print(savednum)
+    store_numbers(savednum)
+    print("Num groups: ", num_groups)
+    clr_num()
+    if passed_op == "+":
+        op_groups.append("+")
+        print(op_groups)
+    elif passed_op == "-":
+        op_groups.append("-")
+        print(op_groups)
+    update_gui(text=op)
+    return savednum
 
 # Equate logic
 def eq():
-    op_pos = part1_eq.index("+")
-    part1 = part1_eq[:op_pos]
-    part2 = part1_eq[op_pos + 1:]
-    p1 = sum(part1)
-    p2 = sum(part2)
-    print(p1)
-    print(p2)
-    print(part1)
-    print(part2)
+    global stored_num
+    i = stored_num
+    for count in range(1, i + 1):
+        group_key = f"group_{count}"
+        
+        locals()[f"num{count}"] = num_groups[group_key]
+        print(locals)
+
 
 # Update GUI
 def update_gui(text):
@@ -86,7 +111,7 @@ Button_8 = tk.Button(root, width=15, height=7, text="8", command=lambda: take_nu
 Button_9 = tk.Button(root, width=15, height=7, text="9", command=lambda: take_num(passed_num=9))
 Button_dot = tk.Button(root, width=15, height=7, text=".")
 Button_0 = tk.Button(root, width=15, height=7, text="0", command=lambda: take_num(passed_num=0))
-Button_Equals = tk.Button(root, width=15, height=7, text="=", command=eq)
+Button_Equals = tk.Button(root, width=15, height=7, text="=", command=lambda: eq())
 Button_Plus = tk.Button(root, width=15, height=7, text="+", command=lambda: take_op(passed_op="+"))
 Button_Minus = tk.Button(root, width=15, height=7, text="-", command=lambda: take_op(passed_op="-"))
 Button_FloorDiv = tk.Button(root, width=15, height=7, text="//", command=lambda: take_op(passed_op="//"))
