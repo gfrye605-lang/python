@@ -6,7 +6,9 @@ from async_tkinter_loop import async_handler, async_mainloop
 # Vars
 current_total = None
 current_num = None
+current_float = None
 pending_op = None
+currently_floating = False
 currentans = None
 firstpassednum = None
 taking_num = False
@@ -19,10 +21,18 @@ def take_num(passed_num):
 
     if taking_num == True and current_num != None:
         print(passed_num)
-        current_num = int(str(current_num) + str(passed_num))
-        print(current_num)
-        update_gui(text= current_num)
-        print(firstpassednum)
+        print(currently_floating)
+        if currently_floating == False:
+            current_num = int(str(current_num) + str(passed_num))
+            print(current_num)
+            update_gui(text= current_num)
+            print(firstpassednum)
+        elif currently_floating:
+            print("float", current_float)
+            print("passednum:",passed_num)
+            current_num = float(str(current_float) + "." + str(passed_num))
+            update_gui(text= current_float)
+            print("Floating", current_num)
 
     elif firstpassednum == None or current_num == None:
         firstpassednum = passed_num
@@ -34,6 +44,7 @@ def take_num(passed_num):
 def take_op(passed_op):
     global pending_op
     global current_total
+    global currently_floating
     save_first_num()
     if passed_op == "+":
         pending_op = "+"
@@ -52,13 +63,27 @@ def take_op(passed_op):
 def save_first_num():
     global current_total
     global current_num
-    if current_total == None:
-        current_total = current_num
-        current_num = None
-    elif current_total != None:
+    global currently_floating
+    if currently_floating and current_float == None:
+        current_total = current_float
+        current_float == None
+    elif currently_floating and current_float != None:
         back_eq()
-        print(current_total)
+        currently_floating = False
+        current_num = None
+        if current_total == None:
+            current_total = current_num
+            current_num = None
+        elif current_total != None:
+            back_eq()
+            print(current_total)
     return current_total
+
+def handle_floats():
+    global currently_floating
+    global current_float
+    current_float = current_num
+    currently_floating = True
 
 # Background answer logic // held in backend
 def back_eq():
@@ -137,12 +162,14 @@ def update_gui(text):
 # Clear button logic
 def clr_num():
     global current_num
-    global taking_part1
+    global taking_num
     global firstpassednum
+    global currently_floating
 
     firstpassednum = None
     current_num = None
-    taking_part1 = False
+    taking_num  = False
+    currently_floating = False
 
     num_label.configure(text="")
 
@@ -171,7 +198,7 @@ Button_6 = tk.Button(root, width=15, height=7, text="6", bd=5,relief="groove", c
 Button_7 = tk.Button(root, width=15, height=7, text="7", bd=5,relief="groove", command=lambda: take_num(passed_num=7))
 Button_8 = tk.Button(root, width=15, height=7, text="8", bd=5,relief="groove", command=lambda: take_num(passed_num=8))
 Button_9 = tk.Button(root, width=15, height=7, text="9", bd=5,relief="groove", command=lambda: take_num(passed_num=9))
-Button_dot = tk.Button(root, width=15, height=7, text=".", bd=5,relief="groove")
+Button_dot = tk.Button(root, width=15, height=7, text=".", bd=5,relief="groove", command=lambda: handle_floats())
 Button_0 = tk.Button(root, width=15, height=7, text="0", bd=5,relief="groove", command=lambda: take_num(passed_num=0))
 Button_Equals = tk.Button(root, width=15, height=7, text="=", bd=5,relief="solid", command=lambda: final_eq())
 Button_Plus = tk.Button(root, width=15, height=7, text="+", bd=5,relief="groove", command=lambda: take_op(passed_op="+"))
