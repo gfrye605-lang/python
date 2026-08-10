@@ -70,7 +70,8 @@ while running:
             answer = num1 % num2
         elif op == "//":
             if num2 == 0:
-                print("You cannot divide by a zero!")
+                print("You cannot divide by a zero! Idiot!")
+                sys.exit()
                 return
             answer = num1 // num2
         elif op == "/":
