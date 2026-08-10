@@ -2,7 +2,6 @@ import tkinter as tk
 import asyncio
 from async_tkinter_loop import async_handler, async_mainloop
 
-
 # Vars
 current_total = None
 current_num = None
@@ -31,7 +30,7 @@ def take_num(passed_num):
             print("float", current_float)
             print("passednum:",passed_num)
             current_num = float(str(current_float) + "." + str(passed_num))
-            update_gui(text= current_float)
+            update_gui(text= current_num)
             print("Floating", current_num)
 
     elif firstpassednum == None or current_num == None:
@@ -45,6 +44,7 @@ def take_op(passed_op):
     global pending_op
     global current_total
     global currently_floating
+    global current_num
     save_first_num()
     if passed_op == "+":
         pending_op = "+"
@@ -58,30 +58,41 @@ def take_op(passed_op):
         pending_op = "//"
     elif passed_op == "%":
         pending_op = "%"
+    update_gui(text=pending_op)
+    print(pending_op)
+    print(current_float)
 
 # Save num
 def save_first_num():
     global current_total
     global current_num
     global currently_floating
-    if currently_floating and current_float == None:
-        current_total = current_float
-        current_float == None
-    elif currently_floating and current_float != None:
+    print("Current Total: ", current_total)
+    if currently_floating == False and current_total == None:
+        current_total = current_num
+        current_num = None    
+    elif currently_floating == False and current_total != None:
         back_eq()
-        currently_floating = False
-        current_num = None
-        if current_total == None:
+        print(current_total)
+    if currently_floating and current_total == None:
             current_total = current_num
+            print("Saved Total", current_total)
+            current_float == None
+            currently_floating = False
             current_num = None
-        elif current_total != None:
+    elif currently_floating and current_num != None:
             back_eq()
-            print(current_total)
+            currently_floating = False
+            current_num = None
     return current_total
 
 def handle_floats():
     global currently_floating
     global current_float
+    global current_num
+    
+    if current_num == None:
+        current_num = 0
     current_float = current_num
     currently_floating = True
 
@@ -120,40 +131,53 @@ def back_eq():
 # Final answer logic // shown on GUI
 def final_eq():
     final_ans = None
-    global current_total
+    global currently_floating
     global current_num
     global pending_op
+    global current_float
     if current_total != None and current_num != None:
         if pending_op == "+":
             final_ans = current_total + current_num
             update_gui(text=final_ans)
-            current_total = None
+            currently_floating = False
+            current_float = None
             pending_op = None
+            current_num = None
         if pending_op == "-":
             final_ans = current_total - current_num
             update_gui(text=final_ans)
-            current_total = None
+            currently_floating = False
+            current_float = None
             pending_op = None
+            current_num = None
         if pending_op == "*":
             final_ans = current_total * current_num
             update_gui(text=final_ans)
-            current_total = None
+            currently_floating = False
+            current_float = None
             pending_op = None
+            current_num = None
         if pending_op == "/":
             final_ans = current_total / current_num
             update_gui(text=final_ans)
-            current_total = None
+            currently_floating = False
+            current_float = None
             pending_op = None
+            current_num = None
         if pending_op == "//":
             final_ans = current_total // current_num
             update_gui(text=final_ans)
-            current_total = None
+            currently_floating = False
+            current_float = None
             pending_op = None
+            current_num = None
         if pending_op == "%":
             final_ans = current_total % current_num
             update_gui(text=final_ans)
-            current_total = None
+            currently_floating = False
+            current_float = None
             pending_op = None
+            current_num = None
         
 # Update GUI
 def update_gui(text):
@@ -165,9 +189,11 @@ def clr_num():
     global taking_num
     global firstpassednum
     global currently_floating
+    global current_total
 
     firstpassednum = None
     current_num = None
+    current_total = None
     taking_num  = False
     currently_floating = False
 
