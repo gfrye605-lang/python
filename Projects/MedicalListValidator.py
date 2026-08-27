@@ -49,7 +49,7 @@ def find_invalid_records(
         'last_visit_id': isinstance(last_visit_id, str)
         and re.fullmatch('v\d+', last_visit_id, re.IGNORECASE)
     }
-    return constraints
+    return [key for key, value in constraints.items() if not value]
 
 def validate(data):
     is_sequence = isinstance(data, (list, tuple))
@@ -67,11 +67,19 @@ def validate(data):
         if not isinstance(dictionary, dict):
             print(f'Invalid format: expected a dictionary at position {index}.')
             is_invalid = True
+            continue
 
         if set(dictionary.keys()) != key_set:
             print(
                 f'Invalid format: {dictionary} at position {index} has missing and/or invalid keys.'
             )
+            is_invalid = True
+            continue
+
+        invalid_records = find_invalid_records(**dictionary)
+        for key in invalid_records:
+            val = dictionary[key]
+            print(f"Unexpected format '{key}: {val}' at position {index}.")
             is_invalid = True
 
     if is_invalid:
@@ -80,4 +88,3 @@ def validate(data):
     return True
 
 validate(medical_records)
-print(find_invalid_records(**medical_records[0]))
