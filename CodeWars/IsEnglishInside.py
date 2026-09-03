@@ -4,5 +4,3 @@ def sp_eng(sentence):
         return True
     else:
         return False
-
-print(sp_eng("5345englis"))
