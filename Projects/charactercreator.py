@@ -1,6 +1,6 @@
 full_dot = '●'
 empty_dot = '○'
-
+# This is the main function to create the character, it takes 4 arguments and beautifies them!
 def create_character(name, strength, intelligence, charisma):
     # Name Validation
     if not isinstance(name , str):
