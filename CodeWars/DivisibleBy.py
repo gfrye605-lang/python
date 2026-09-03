@@ -19,6 +19,6 @@ def divisible_by(numbers, divisor):
         else:
       #      print(numbers[i])    
             i += 1
-pass
+    return p
 
 divisible_by([0,1,2,3,4,5,6,7,8,9,10], 1)
