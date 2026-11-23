@@ -100,7 +100,7 @@ def update_scrn():
         print(f"WORD: {current_g}        Guesses: {i_guess}       \n")
     except IndexError:
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("You lose!")
+        print("You lose! The word was",word)
         running = False
 
 def correct_guess(g):
